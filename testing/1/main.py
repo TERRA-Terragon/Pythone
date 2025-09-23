@@ -1,3 +1,4 @@
+print("Выполнил:Семоненко Богдан")
 povtor={0}
 def f(a,b):
     c = 0
@@ -85,3 +86,126 @@ class NormalClass:
     pass
 class GoodClass(NormalClass):
     pass
+#7
+def read_file(file_path):
+    file = None
+    try:
+        file = open(file_path, 'r')
+        data = file.read()
+        print("Содержимое файла:", data)
+
+    except FileNotFoundError:
+        print(f"Файл '{file_path}' не найден!")
+
+    except Exception as e:
+        print(f"Произошла ошибка: {str(e)}")
+
+    finally:
+        if file:
+            file.close()
+            print("Файл закрыт")
+read_file("sverla")
+#8
+def my_chain(*iterables):
+    """Аналог itertools.chain - объединяет несколько итерируемых объектов в один поток"""
+    for iterable in iterables:
+        for item in iterable:
+            yield item
+
+
+# Пример использования
+if __name__ == "__main__":
+    # Тестируем на разных типах данных
+    list1 = [1, 2, 3]
+    list2 = [4, 5, 6]
+    tuple1 = (7, 8, 9)
+    string = "abc"
+
+    print("Объединяем списки, кортеж и строку:")
+    for item in my_chain(list1, list2, tuple1, string):
+        print(item, end=" ")
+    # Вывод: 1 2 3 4 5 6 7 8 9 a b c
+
+    print("\n\nТестируем с одним аргументом:")
+    for item in my_chain([1, 2, 3]):
+        print(item, end=" ")
+    # Вывод: 1 2 3
+
+    print("\n\nТестируем с пустыми итерируемыми объектами:")
+    for item in my_chain([], [1, 2], (), "hi"):
+        print(item, end=" ")
+#8
+class testDiscriptor:
+    def __init__(self):
+        self.zabot = 12
+        print(self.zabot)
+    def read(self):
+        return (self.zabot/12)
+
+    def __del__(self):
+
+        delattr(self.zabot)
+        print("Переменная удалена")
+print(testDiscriptor)
+#9
+class LoggedAttribute:
+    """Дескриптор, который логирует все операции с атрибутом"""
+
+    def __init__(self, name=None):
+        self.name = name
+        self.value = None
+
+    def __set_name__(self, owner, name):
+        # Автоматически получаем имя атрибута
+        if self.name is None:
+            self.name = name
+
+    def __get__(self, obj, objtype=None):
+        # Логируем чтение атрибута
+        if obj is None:
+            # Вызывается из класса, а не из экземпляра
+            print(f"LOG: Чтение атрибута {self.name} из класса")
+            return self
+
+        value = self.value
+        # Используем id объекта вместо вызова __str__ чтобы избежать рекурсии
+        print(f"LOG: Чтение атрибута {self.name} из экземпляра {id(obj)}: {value}")
+        return value
+
+    def __set__(self, obj, value):
+        # Логируем запись атрибута
+        old_value = self.value
+        self.value = value
+        print(f"LOG: Запись атрибута {self.name} в экземпляр {id(obj)}: {old_value} -> {value}")
+
+    def __delete__(self, obj):
+        # Логируем удаление атрибута
+        print(f"LOG: Удаление атрибута {self.name} из экземпляра {id(obj)}")
+        self.value = None
+
+
+class Person:
+    # Используем наш дескриптор
+    name = LoggedAttribute()
+    age = LoggedAttribute()
+
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    def __str__(self):
+        # Безопасное обращение к атрибутам через super() или прямое обращение к дескриптору
+        return f"Person(name={self.__class__.name.value}, age={self.__class__.age.value})"
+
+
+# Тестируем
+if __name__ == "__main__":
+    print("=== Создание экземпляра ===")
+    PP = Person("Grigor", 123)
+
+    print("\n=== Чтение атрибутов ===")
+    print(f"Имя: {PP.name}")
+    print(f"Возраст: {PP.age}")
+
+    print("\n=== Вывод объекта ===")
+    print(PP)
